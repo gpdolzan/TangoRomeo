@@ -1,17 +1,24 @@
-main: main.o reader.o
-	gcc -Wextra -g -o main main.o reader.o
+CFLAGS = -Wextra -g
 
-reader.o: reader.c
-	gcc -Wextra -g -c reader.c
+objs = main.o reader.o
 
-main.o: main.c
-	gcc -Wextra -g -c main.c
+# regra default (primeira regra)
+all: main
 
+# regras de ligacao
+main: $(objs)
+
+# regras de compilação
+main.o: main.c reader.h
+reader.o: reader.c reader.h
+ 
+# remove arquivos temporários
 clean:
-	rm main.o reader.o
-
-purge:
-	rm main.o reader.o main
+	-rm -f $(objs) *~
+ 
+# remove tudo o que não for o código-fonte
+purge: clean
+	-rm -f main
 
 run: main
 	./main
