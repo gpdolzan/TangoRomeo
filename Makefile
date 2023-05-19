@@ -1,35 +1,34 @@
+CC = gcc
 CFLAGS = -Wextra -g
+EXEC = server client
 
-objs = main.o reader.o ConexaoRawSocket.o
+SRC = $(wildcard *.c)
+OBJS = $(SRC:.c=.o)
 
-# regra default (primeira regra)
-all: main
+.PHONY: all clean purge run help
 
-# regras de ligacao
-main: $(objs)
+all: $(EXEC)
 
-# regras de compilação
-main.o: main.c reader.h
-reader.o: reader.c reader.h
-ConexaoRawSocket.o: ConexaoRawSocket.c ConexaoRawSocket.h
- 
-# remove arquivos temporários
+$(EXEC): $(OBJS)
+	$(CC) $(CFLAGS) $^ -o $@
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
 clean:
-	-rm -f $(objs) *~
- 
-# remove tudo o que não for o código-fonte
-purge: clean
-	-rm -f main
+	-rm -f $(OBJS) *~
 
-run: main
-	./main
+purge: clean
+	-rm -f $(EXEC)
+
+run: $(EXEC)
+	sudo ./server & sudo ./client
 
 help:
-	@echo "Targets do Makefile:"
-	@echo "main: Usa os objetos main.o e reader.o para criar o executavel main"
-	@echo "main.o: Compila main.c para criar o objeto main.o"
-	@echo "reader.o: Compila reader.c para criar o objeto reader.o"
-	@echo "clean: Remove objetos main.o e reader.o"
-	@echo "purge: Remove main.o, reader.o e o executavel main"
-	@echo "run: Roda o executavel main, se não existir, chama o target main"
-	@echo "help: Imprime essas mensagens de ajuda"
+	@echo "Targets in Makefile:"
+	@echo "server: Compiles and links the server code"
+	@echo "client: Compiles and links the client code"
+	@echo "clean: Removes object files and temporary files"
+	@echo "purge: Removes object files, executables, and temporary files"
+	@echo "run: Runs both the server and client executables"
+	@echo "help: Prints this help message"
