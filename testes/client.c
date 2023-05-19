@@ -6,39 +6,38 @@
 
 int main()
 {
-  struct sockaddr_in saddr;
+  struct sockaddr_in server_addr;
 
   int client = socket(AF_INET, SOCK_STREAM, 0);
 
-  saddr.sin_family = AF_INET;
-  saddr.sin_port = htons(5000);
+  server_addr.sin_family = AF_INET;
+  server_addr.sin_port = htons(5000);
+  server_addr.sin_addr.s_addr = inet_addr("127.0.0.1"); // Server IP address
 
-  if (inet_pton(AF_INET, "127.0.0.1", &(saddr.sin_addr)) <= 0)
+  if (connect(client, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
   {
-    printf("Invalid address/ Address not supported\n");
+    perror("Connection failed");
     return 1;
   }
 
-  if (connect(client, (struct sockaddr *)&saddr, sizeof(saddr)) < 0)
-  {
-    printf("Connection Failed\n");
-    return 1;
-  }
+  char message[BUFSIZ];
 
   while (1)
   {
-    printf("Digite uma mensagem para enviar: ");
-    char message[BUFSIZ];
-    fgets(message, sizeof(message), stdin);
-    message[strcspn(message, "\n")] = '\0'; // Remove trailing newline character
+    printf("Envie uma mensagem: ");
+    fgets(message, BUFSIZ, stdin);
+
+    // Remove trailing newline character from the input
+    message[strcspn(message, "\n")] = '\0';
+
+    if (strcmp(message, "q") == 0)
+      break;
 
     if (send(client, message, strlen(message), 0) < 0)
     {
-      printf("Send failed\n");
+      perror("Send failed");
       return 1;
     }
-
-    printf("Mensagem enviada: %s\n", message);
   }
 
   close(client);

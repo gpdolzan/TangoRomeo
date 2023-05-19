@@ -2,6 +2,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <string.h>
 
 int main()
 {
@@ -26,9 +27,15 @@ int main()
   {
     cliente = accept(server, (struct sockaddr *)&caddr, &csize);
 
-    recv(cliente, buffer, BUFSIZ, 0);
+    while (1)
+    {
+      ssize_t recv_size = recv(cliente, buffer, sizeof(buffer), 0);
 
-    printf("Mensagem recebida: %s\n", buffer);
+      if (recv_size <= 0)
+        break;
+
+      printf("Mensagem recebida: %.*s\n", (int)recv_size, buffer);
+    }
 
     close(cliente);
   }
